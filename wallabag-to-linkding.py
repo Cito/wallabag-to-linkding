@@ -7,6 +7,7 @@ Load Wallabag JSON export file into linkding via REST API.
 
 import json
 import os
+import time
 import warnings
 
 try:
@@ -16,8 +17,12 @@ except ImportError as e:
 
 
 JSON_FILE = 'All articles.json'
+
 API_TOKEN = 'effef1ea896aa779db801ffb43c6415675a416e6'
 API_URL = 'http://localhost:9090'
+
+HTTP_TIMEOUT_SECONDS = 60
+WAIT_BETWEEN_REQUESTS_SECONDS = 3
 
 
 def load_json_file():
@@ -41,6 +46,7 @@ def get_client():
     return httpx.Client(
         base_url=url,
         headers={"Authorization": f"Token {token}"},
+        timeout=HTTP_TIMEOUT_SECONDS,
     )
 
 
@@ -107,6 +113,7 @@ def main():
     client = get_client()
     bookmarks = load_json_file()
     num_entries = len(bookmarks)
+    wait_time = WAIT_BETWEEN_REQUESTS_SECONDS
     for num, entry in enumerate(reversed(bookmarks)):
         payload = make_bookmark(entry)
         if not payload:
@@ -121,6 +128,8 @@ def main():
                 name += f" ({created_at[:10]})"
             print("Importing asset for bookmark", bookmark_id)
             post_asset(client, bookmark_id, name, asset)
+        if wait_time:
+            time.sleep(wait_time)
 
 
 if __name__ == "__main__":
