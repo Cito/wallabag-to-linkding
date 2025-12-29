@@ -18,7 +18,7 @@ except ImportError as e:
 
 JSON_FILE = 'All articles.json'
 
-API_TOKEN = 'effef1ea896aa779db801ffb43c6415675a416e6'
+API_TOKEN = '...'
 API_URL = 'http://localhost:9090'
 
 HTTP_TIMEOUT_SECONDS = 60
@@ -75,7 +75,7 @@ def post_bookmark(client, payload):
     response.raise_for_status()
     posted = response.json()
     bookmark_id = posted.get("id")
-    if not bookmark_id or posted.get("url") != url:
+    if not bookmark_id or not posted.get("url"):
         raise RuntimeError(f"Failed to post bookmark: {url}")
     return bookmark_id
 
@@ -111,10 +111,10 @@ def post_asset(client, bookmark_id, name, asset):
 
 def main():
     client = get_client()
-    bookmarks = load_json_file()
-    num_entries = len(bookmarks)
+    entries = load_json_file()
+    num_entries = len(entries)
     wait_time = WAIT_BETWEEN_REQUESTS_SECONDS
-    for num, entry in enumerate(reversed(bookmarks)):
+    for num, entry in enumerate(reversed(entries)):
         payload = make_bookmark(entry)
         if not payload:
             continue
